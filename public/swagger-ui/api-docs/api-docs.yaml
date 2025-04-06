@@ -1,0 +1,393 @@
+openapi: 3.0.0
+info:
+  title: Car Brands API
+  description: API для управления марками автомобилей и их моделями
+  version: 1.0.0
+servers:
+  - url: http://localhost:9000/api
+    description: Local development server
+  - url: https://api.example.com/v1
+    description: Production server
+
+paths:
+  /car-brands:
+    get:
+      tags: [Brands]
+      summary: Получить список марок
+      description: Возвращает список автомобильных марок с возможностью фильтрации
+      operationId: getCarBrands
+      parameters:
+        - $ref: '#/components/parameters/TitleFilter'
+      responses:
+        '200':
+          $ref: '#/components/responses/CarBrandListResponse'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    post:
+      tags: [Brands]
+      summary: Создать новую марку
+      operationId: createCarBrand
+      requestBody:
+        $ref: '#/components/requestBodies/CarBrandCreate'
+      responses:
+        '201':
+          $ref: '#/components/responses/CarBrandResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /car-brands/{id}:
+    get:
+      tags: [Brands]
+      summary: Получить марку по ID
+      operationId: getCarBrandById
+      parameters:
+        - $ref: '#/components/parameters/BrandId'
+      responses:
+        '200':
+          $ref: '#/components/responses/CarBrandResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [Brands]
+      summary: Обновить марку
+      operationId: updateCarBrand
+      parameters:
+        - $ref: '#/components/parameters/BrandId'
+      requestBody:
+        $ref: '#/components/requestBodies/CarBrandUpdate'
+      responses:
+        '200':
+          $ref: '#/components/responses/CarBrandResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+    delete:
+      tags: [Brands]
+      summary: Удалить марку
+      operationId: deleteCarBrand
+      parameters:
+        - $ref: '#/components/parameters/BrandId'
+      responses:
+        '204':
+          description: Марка успешно удалена
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /car-brands/{brandId}/models:
+    get:
+      tags: [Models]
+      summary: Получить список моделей марки
+      operationId: getCarModels
+      parameters:
+        - $ref: '#/components/parameters/BrandIdInPath'
+        - $ref: '#/components/parameters/TitleFilter'
+      responses:
+        '200':
+          $ref: '#/components/responses/CarModelListResponse'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    post:
+      tags: [Models]
+      summary: Создать новую модель
+      operationId: createCarModel
+      parameters:
+        - $ref: '#/components/parameters/BrandIdInPath'
+      requestBody:
+        $ref: '#/components/requestBodies/CarModelCreate'
+      responses:
+        '201':
+          $ref: '#/components/responses/CarModelResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /car-brands/{brandId}/models/{modelId}:
+    get:
+      tags: [Models]
+      summary: Получить модель по ID
+      operationId: getCarModelById
+      parameters:
+        - $ref: '#/components/parameters/BrandIdInPath'
+        - $ref: '#/components/parameters/ModelId'
+      responses:
+        '200':
+          $ref: '#/components/responses/CarModelResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags: [Models]
+      summary: Обновить модель
+      operationId: updateCarModel
+      parameters:
+        - $ref: '#/components/parameters/BrandIdInPath'
+        - $ref: '#/components/parameters/ModelId'
+      requestBody:
+        $ref: '#/components/requestBodies/CarModelUpdate'
+      responses:
+        '200':
+          $ref: '#/components/responses/CarModelResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+    delete:
+      tags: [Models]
+      summary: Удалить модель
+      operationId: deleteCarModel
+      parameters:
+        - $ref: '#/components/parameters/BrandIdInPath'
+        - $ref: '#/components/parameters/ModelId'
+      responses:
+        '204':
+          description: Модель успешно удалена
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+components:
+  schemas:
+    CarBrand:
+      type: object
+      required: [id, title]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        title:
+          type: string
+          example: "Lada"
+        created_at:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+
+    CarBrandCreate:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "Lada"
+
+    CarBrandUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "New Brand Name"
+
+    CarModel:
+      type: object
+      required: [id, title, car_brand_id]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        title:
+          type: string
+          example: "Granta"
+        car_brand_id:
+          type: integer
+          format: int64
+          example: 1
+        created_at:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+
+    CarModelCreate:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "Vesta"
+
+    CarModelUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "Updated Model Name"
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Код ошибки
+        message:
+          type: string
+          description: Описание ошибки
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+
+  parameters:
+    TitleFilter:
+      name: title
+      in: query
+      description: Фильтр по названию
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+
+    BrandId:
+      name: id
+      in: path
+      description: ID марки автомобиля
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    BrandIdInPath:
+      name: brandId
+      in: path
+      description: ID марки автомобиля
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    ModelId:
+      name: modelId
+      in: path
+      description: ID модели автомобиля
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+  requestBodies:
+    CarBrandCreate:
+      description: Данные для создания марки
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CarBrandCreate'
+
+    CarBrandUpdate:
+      description: Данные для обновления марки
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CarBrandUpdate'
+
+    CarModelCreate:
+      description: Данные для создания модели
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CarModelCreate'
+
+    CarModelUpdate:
+      description: Данные для обновления модели
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CarModelUpdate'
+
+  responses:
+    CarBrandListResponse:
+      description: Список марок автомобилей
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/CarBrand'
+
+    CarBrandResponse:
+      description: Данные марки автомобиля
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CarBrand'
+
+    CarModelListResponse:
+      description: Список моделей автомобилей
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/CarModel'
+
+    CarModelResponse:
+      description: Данные модели автомобиля
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CarModel'
+
+    NotFoundError:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+            example:
+              error: "not_found"
+              message: "Ресурс не найден"
+
+    ValidationError:
+      description: Ошибка валидации
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+            example:
+              error: "validation_error"
+              message: "Ошибка валидации"
+              details:
+                - field: "title"
+                  message: "Название обязательно для заполнения"
+
+    ServerError:
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+            example:
+              error: "server_error"
+              message: "Произошла внутренняя ошибка сервера"

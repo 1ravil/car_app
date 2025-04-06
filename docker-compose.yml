@@ -1,0 +1,37 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: _docker/app/Dockerfile
+        volumes:
+            - ./:/var/www
+        ports:
+            - "9000:9000"
+        depends_on:
+            - db
+        container_name: car-api-app
+        environment:
+            DB_HOST: db
+            DB_PORT: 5432
+            DB_DATABASE: DB_car-api
+            DB_USERNAME: postgres
+            DB_PASSWORD: 000
+
+    db:
+        image: postgres:13
+        restart: always
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        environment:
+            POSTGRES_PASSWORD: 000
+            DB_HOST: db
+            DB_PORT: 5432
+            DB_DATABASE: DB_car-api
+            DB_USERNAME: postgres
+            DB_PASSWORD: 000
+        ports:
+            - "5432:5432"
+        container_name: car-api_db
+
+volumes:
+    postgres_data:
